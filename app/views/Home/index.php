@@ -30,11 +30,19 @@
     var box = document.getElementById('box');
 
     box.addEventListener('keyup', function(event) {
+      if (conn.readyState === WebSocket.OPEN) {
         conn.send(box.value);
+    } else {
+        console.log('WebSocket connection is not open.');
+    }
     });
 
     setInterval(function() {
+      if (conn.readyState === WebSocket.OPEN) {
         conn.send(box.value);
+    } else {
+        console.log('WebSocket connection is not open.');
+    }
     }, 2000);
 
   </script>
