@@ -1,0 +1,12 @@
+{
+    "autoload": {
+        "psr-4": {
+            "MyApp\\": "app/core"
+        }
+    },
+    "require": {
+        "cboden/ratchet": "^0.4",
+        "erusev/parsedown": "^1.7",
+        "phpmailer/phpmailer": "^6.8"
+    }
+}

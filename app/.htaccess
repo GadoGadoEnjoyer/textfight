@@ -1,0 +1,3 @@
+#<Directory "/var/www/example.com/public_html">AllowOverride All</Directory>
+#Ingat Masukin ini ke /etc/apache2/sites-available/000-default.conf
+Options -Indexes
