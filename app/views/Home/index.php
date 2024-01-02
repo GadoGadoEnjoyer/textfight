@@ -13,7 +13,7 @@
     </form>
   </body>
   <script>
-    var conn = new WebSocket('ws://<?php echo($_SERVER['SERVER_ADDR'])?>:8080?room=<?php echo $data; ?>');
+    var conn = new WebSocket('ws://<?php echo(getenv('SERVER_ADDR'))?>:8080?room=<?php echo $data; ?>');
     conn.onopen = function(e) {
         console.log("Connection established!");
     };
