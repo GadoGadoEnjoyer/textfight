@@ -1,5 +1,5 @@
 <?php
-namespace MyApp;
+namespace MyApp; 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 
@@ -11,7 +11,7 @@ class Chat implements MessageComponentInterface {
 
     public function onOpen(ConnectionInterface $conn) {
         $roomlimit = 2;
-
+        
         // Store the new connection to send messages to later
         $this->clients[$conn->resourceId] = $conn;
         $roomkey = str_replace('room=', '', $conn->httpRequest->getUri()->getQuery());
@@ -23,17 +23,45 @@ class Chat implements MessageComponentInterface {
         }
         if (count($this->rooms[$roomkey]) >= $roomlimit) {
             echo "Room Limit reached!";
-            $conn->send("Limit");
+            $conn->send(json_encode(['type' => 'special', 'content' => 'Limit']));
             $conn->close();
         }
         else{
             array_push($this->rooms[$roomkey],$conn);
+
+            if(count($this->rooms[$roomkey]) == $roomlimit){
+                $specialmsg = json_encode(['type' => 'special', 'content' => 'Startgame']);
+                foreach($this->rooms[$roomkey] as $client) {
+                    $client->send($specialmsg);
+                }
+            }
         }
     
         echo "New connection! ({$conn->resourceId})\n";
     }
-
+    
     public function onMessage(ConnectionInterface $from, $msg) {
+        
+        $room = str_replace('room=', '', $from->httpRequest->getUri()->getQuery());
+
+        $decodedmsg = json_decode($msg);
+        if($decodedmsg->type == "finish"){
+            $gamingtext = "Listen to all the young children from the GDR (East Germany) Boys and girls, all friends of the USSR I want to speak and talk about the organization That should educate and raise our generation Here we're all so free (in the FDJ) Here we're all so German (in the FDJ)";
+            $gamingtextlength = strlen($gamingtext);
+            $wrongletters = 0;
+            for ($i = 0; $i < $gamingtextlength; $i++) {
+                if ($gamingtext[$i] !== $decodedmsg->content[$i]) {
+                    $wrongletters++;
+                }
+            }
+            $accuracy = (1 - $wrongletters / strlen($decodedmsg->content)) * 100;
+            foreach($this->rooms[$room] as $client) {
+                if ($from !== $client) {
+                    $client->send(json_encode(['type' => 'normal', 'content' => "Accuracy: " . number_format($accuracy, 2) . "%"]));
+
+                }
+            }
+        }
         //Rate Limit (Thansk GPT)
         $currentTime = microtime(true);
         $clientId = $from->resourceId;
@@ -44,7 +72,6 @@ class Chat implements MessageComponentInterface {
             return;
         }
 
-        $room = str_replace('room=', '', $from->httpRequest->getUri()->getQuery());
 
         $numRecv = count($this->rooms[$room]) - 1;
 
@@ -60,7 +87,7 @@ class Chat implements MessageComponentInterface {
             // Broadcast the message to other clients
             foreach($this->rooms[$room] as $client) {
                 if ($from !== $client) {
-                    $client->send($msg);
+                    $client->send(json_encode(['type' => 'normal', 'content' => ''.$decodedmsg->content.'']));
                 }
             }
         }
@@ -84,7 +111,7 @@ class Chat implements MessageComponentInterface {
         if (in_array($conn, $this->rooms[$roomid])) {
             // The connection is closed, remove it, as we can no longer send it messages
             foreach ($this->rooms[$roomid] as $client) {
-                $client->send("User Disconnected");
+                $client->send(json_encode(['type' => 'special', 'content' => 'disconnect']));
             }
         }
 
@@ -104,5 +131,4 @@ class Chat implements MessageComponentInterface {
 
         $conn->close();
     }
-    
 }

@@ -1,4 +1,5 @@
 <?php 
+
 class User_Model{
     private $table = 'Users';
     private $db;
@@ -7,29 +8,42 @@ class User_Model{
         $this->db = new Database;
     }
 
-    public function Register($name, $password){
+    public function Register($name, $password, $ip_address){
         try {
             $this->db->query('INSERT INTO ' . $this->table . ' (name, password, ip_address) VALUES (:name, :password, :ip_address)');
         
             // Bind parameters with their values
             $this->db->bind('name', $name);
             $this->db->bind('password', $password);
-            $this->db->bind('ip_address', $_SERVER['REMOTE_ADDR']);
+            $this->db->bind('ip_address', $ip_address);
 
-            $this->db->execute();
+            if(!$this->db->execute()){
+                //IDK WHY ITS LIKE THIS DONT ASK
+                return true;
+            }
+            else{
+                return false;
+            }
         } catch (Exception $e) {
             echo 'Error: ' . $e->getMessage();
         }
     }
 
-    public function Check_IP($ip){
-        $this->db->query('SELECT ip_address FROM ' . $this->table);
-        $ip_list = $this->db->resultSet();
-        if(in_array($ip, $ip_list)){
-            return true;
-        }
-        else{
-            return false;
+    public function Login($name, $password){
+        try {
+            $this->db->query('SELECT * FROM ' . $this->table . ' WHERE name = :name AND password = :password');
+            $this->db->bind('name', $name);
+            $this->db->bind('password', $password);
+            $this->db->execute();
+            $result = $this->db->resultSingle();
+            if($result){
+                return true;
+            }
+            else{
+                return false;
+            }
+        } catch (Exception $e) {
+            echo 'Error: ' . $e->getMessage();
         }
     }
 }
