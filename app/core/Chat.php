@@ -51,16 +51,17 @@ class Chat implements MessageComponentInterface {
         if($numRecv == 0){
             echo "No one else in this room\n";
         }
-
-        echo sprintf('Connection %d sending message "%s" in room %s to %d other connection%s' . "\n"
+        else{
+            echo sprintf('Connection %d sending message "%s" in room %s to %d other connection%s' . "\n"
             , $from->resourceId, $msg, $room, $numRecv, $numRecv == 1 ? '' : 's');
 
-        // Update the last message time for the client
-        $this->lastMessageTime[$clientId] = $currentTime;
-        // Broadcast the message to other clients
-        foreach($this->rooms[$room] as $client) {
-            if ($from !== $client) {
-                $client->send($msg);
+            // Update the last message time for the client
+            $this->lastMessageTime[$clientId] = $currentTime;
+            // Broadcast the message to other clients
+            foreach($this->rooms[$room] as $client) {
+                if ($from !== $client) {
+                    $client->send($msg);
+                }
             }
         }
     }
