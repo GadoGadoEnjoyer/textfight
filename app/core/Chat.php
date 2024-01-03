@@ -44,20 +44,28 @@ class Chat implements MessageComponentInterface {
             return;
         }
 
+        $room = str_replace('room=', '', $from->httpRequest->getUri()->getQuery());
+
+        $numRecv = count($this->rooms[$room]) - 1;
+
+        if($numRecv == 0){
+            $from->send("No one is here!");
+        }
+        else{
+            $from->send("There are $numRecv other people in this room");
+        }
+
+        echo sprintf('Connection %d sending message "%s" in room %s to %d other connection%s' . "\n"
+            , $from->resourceId, $msg, $room, $numRecv, $numRecv == 1 ? '' : 's');
+
         // Update the last message time for the client
         $this->lastMessageTime[$clientId] = $currentTime;
-        $room = str_replace('room=', '', $from->httpRequest->getUri()->getQuery());
         // Broadcast the message to other clients
         foreach($this->rooms[$room] as $client) {
             if ($from !== $client) {
                 $client->send($msg);
             }
         }
-
-
-        $numRecv = count($this->rooms[$room]) - 1;
-        echo sprintf('Connection %d sending message "%s" in room %s to %d other connection%s' . "\n"
-            , $from->resourceId, $msg, $room, $numRecv, $numRecv == 1 ? '' : 's');
     }
 
     private function isRateLimited($clientId, $currentTime) {
