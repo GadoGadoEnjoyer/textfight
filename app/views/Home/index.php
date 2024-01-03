@@ -25,7 +25,7 @@
       e.preventDefault();
       var room = document.getElementById('room').value;
       var form = document.getElementById('roomform');
-      form.action = "<?php echo(BASEURL)?>/" + room;
+      form.action = "<?php echo(BASEURL)?>/";
       form.submit();
     });
     document.getElementById('placeholder').value = "<?php echo($data['text'])?>";
