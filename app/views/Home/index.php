@@ -17,7 +17,7 @@
     <form id="form">
     <textarea id="box" style="width:300px;height:300px; border: 1px solid black; background-color: rgba(255,255,255,0); position:absolute; top:300px;"></textarea>
     <textarea id="placeholder" name="placeholder" style="width:300px;height:300px; border: 1px solid black; color:gray; position:absolute; top:300px; z-index:-3;" disabled></textarea>
-    <textarea id="box2" style="width:300px;height:300px; border: 1px solid black; position:absolute; top:500px; left:500px;" disabled></textarea>
+    <textarea id="box2" style="width:300px;height:300px; border: 1px solid black; position:absolute; top:500px; left:200px;" disabled></textarea>
     </form>
   </body>
   <script>
