@@ -26,7 +26,7 @@
       var room = document.getElementById('room').value;
       window.location.href = room;
     });
-    document.getElementById('placeholder').value = "<?php echo($data['text'])?>";
+    //document.getElementById('placeholder').value = "<?php echo($data['text'])?>";
     var conn = new WebSocket('ws://<?php echo(getenv('SERVER_ADDR'))?>:8080?room=<?php echo $data['room']; ?>');
     conn.onopen = function(e) {
         console.log("Connection established!");
