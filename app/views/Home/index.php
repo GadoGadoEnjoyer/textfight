@@ -24,9 +24,7 @@
     document.getElementById('roomform').addEventListener('submit', function(e) {
       e.preventDefault();
       var room = document.getElementById('room').value;
-      var form = document.getElementById('roomform');
-      form.action = "<?php echo(BASEURL)?>/";
-      form.submit();
+      window.location.href = "<?php echo($_SERVER["SERVER_ADDR"]);?>/"+room;
     });
     document.getElementById('placeholder').value = "<?php echo($data['text'])?>";
     var conn = new WebSocket('ws://<?php echo(getenv('SERVER_ADDR'))?>:8080?room=<?php echo $data['room']; ?>');
