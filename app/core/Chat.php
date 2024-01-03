@@ -49,10 +49,7 @@ class Chat implements MessageComponentInterface {
         $numRecv = count($this->rooms[$room]) - 1;
 
         if($numRecv == 0){
-            $from->send("No one is here!");
-        }
-        else{
-            $from->send("There are $numRecv other people in this room");
+            echo "No one else in this room\n";
         }
 
         echo sprintf('Connection %d sending message "%s" in room %s to %d other connection%s' . "\n"
