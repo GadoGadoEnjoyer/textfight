@@ -7,13 +7,27 @@
     <title>Document</title>
   </head>
   <body>
+    <h3>Text : <?php echo($data['text']); ?></h3>
+    <h2>Your current Room : <?php echo($data['room']); ?></h2> 
+    <h2>Change Room : </h2>
+    <form id="roomform" action="<?php echo(BASEURL)?>/" method="get">
+      <input type="text" name="room" id="room">
+      <input type="submit" value="Change Room"> 
+    </form>
     <form id="form">
-        <textarea id="box" style="width:300px;height:300px; border: 1px solid black;"></textarea>
-        <textarea id="box2" style="width:300px;height:300px; border: 1px solid black;" disabled></textarea>
+    <textarea id="box" style="width:300px;height:300px; border: 1px solid black; background-color: rgba(255,255,255,0); position:absolute; top:300px;"></textarea>
+    <textarea id="placeholder" name="placeholder" style="width:300px;height:300px; border: 1px solid black; color:gray; position:absolute; top:300px; z-index:-3;" disabled></textarea>
+    <textarea id="box2" style="width:300px;height:300px; border: 1px solid black; position:absolute; top:500px; left:500px;" disabled></textarea>
     </form>
   </body>
   <script>
-    var conn = new WebSocket('ws://<?php echo(getenv('SERVER_ADDR'))?>:8080?room=<?php echo $data; ?>');
+    document.getElementById('roomform').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var room = document.getElementById('room').value;
+      window.location.href = "<?php echo(BASEURL)?>/"+room;
+    });
+    document.getElementById('placeholder').value = "<?php echo($data['text'])?>";
+    var conn = new WebSocket('ws://<?php echo(getenv('SERVER_ADDR'))?>:8080?room=<?php echo $data['room']; ?>');
     conn.onopen = function(e) {
         console.log("Connection established!");
     };
