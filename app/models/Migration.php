@@ -1,6 +1,8 @@
 <?php 
 require_once dirname(__DIR__).'/core/Controller.php';
 require_once dirname(__DIR__).'/core/Database.php';
+require_once dirname(__DIR__).'/core/Constants.php';
+
 
 
 class Migration{
