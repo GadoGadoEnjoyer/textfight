@@ -77,6 +77,7 @@
           if(decodedmsg.content == "Startgame"){
             alert("Game Started!");
             document.getElementById('startbtn').style.display = "none";
+            document.getElementById('donebtn').style.display = "block";
             return;
           }
           else if(decodedmsg.content == "gameready"){
