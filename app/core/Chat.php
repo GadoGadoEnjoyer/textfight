@@ -89,7 +89,7 @@ class Chat implements MessageComponentInterface {
         }
 
         if($decodedmsg->type == "start"){
-            $specialmsg = json_encode(['type' => 'special', 'content' => '']);
+            $specialmsg = json_encode(['type' => 'special', 'content' => 'Startgame']);
             foreach($this->rooms[$room] as $client) {
                 $client->send($specialmsg);
             }
