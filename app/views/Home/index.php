@@ -116,8 +116,8 @@
           conn.send(JSON.stringify(msg));
       }
       });
-
-      function updatebox(){
+    }
+    function updatebox(){
         var box = document.getElementById('box');
         var placeholder = document.getElementById('placeholder');
 
@@ -132,8 +132,6 @@
         donemsg.content = box.value;
         conn.send(JSON.stringify(donemsg));
       }
-    }
-    
 
   </script>
 </html>
