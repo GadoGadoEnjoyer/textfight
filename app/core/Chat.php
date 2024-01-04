@@ -6,7 +6,7 @@ use Ratchet\ConnectionInterface;
 class Chat implements MessageComponentInterface {
     private $clients = [];
     private $rooms = [];
-    protected $messageRateLimit = 5; //Per Seconds
+    protected $messageRateLimit = 10; //Per Seconds
     protected $lastMessageTime = [];
 
     public function onOpen(ConnectionInterface $conn) {
@@ -30,7 +30,7 @@ class Chat implements MessageComponentInterface {
             array_push($this->rooms[$roomkey],$conn);
 
             if(count($this->rooms[$roomkey]) == $roomlimit){
-                $specialmsg = json_encode(['type' => 'special', 'content' => 'Startgame']);
+                $specialmsg = json_encode(['type' => 'special', 'content' => 'gameready']);
                 foreach($this->rooms[$roomkey] as $client) {
                     $client->send($specialmsg);
                 }
@@ -41,31 +41,59 @@ class Chat implements MessageComponentInterface {
     }
     
     public function onMessage(ConnectionInterface $from, $msg) {
-        
+       
+        $clientId = $from->resourceId;
         $room = str_replace('room=', '', $from->httpRequest->getUri()->getQuery());
+        $numRecv = count($this->rooms[$room]) - 1;
+        //Rate Limit (Thansk GPT)
+        $currentTime = microtime(true);
 
         $decodedmsg = json_decode($msg);
-        if($decodedmsg->type == "finish"){
+
+        if ($decodedmsg->type == "finish") {
             $gamingtext = "Listen to all the young children from the GDR (East Germany) Boys and girls, all friends of the USSR I want to speak and talk about the organization That should educate and raise our generation Here we're all so free (in the FDJ) Here we're all so German (in the FDJ)";
             $gamingtextlength = strlen($gamingtext);
-            $wrongletters = 0;
-            for ($i = 0; $i < $gamingtextlength; $i++) {
-                if ($gamingtext[$i] !== $decodedmsg->content[$i]) {
-                    $wrongletters++;
+            $decodedContent = $decodedmsg->content;
+            
+            // Check if the lengths are equal
+            if (strlen($decodedContent) !== $gamingtextlength) {
+                $this->lastMessageTime[$clientId] = $currentTime;
+            
+                foreach($this->rooms[$room] as $client) {
+                    if ($from == $client) {
+                        $client->send(json_encode(['type' => 'alert', 'content' => 'BELUM SELESAI']));
+                    }
                 }
-            }
-            $accuracy = (1 - $wrongletters / strlen($decodedmsg->content)) * 100;
-            foreach($this->rooms[$room] as $client) {
-                if ($from !== $client) {
-                    $client->send(json_encode(['type' => 'normal', 'content' => "Accuracy: " . number_format($accuracy, 2) . "%"]));
-
+            } else {
+                $wrongletters = 0;
+        
+                for ($i = 0; $i < $gamingtextlength; $i++) {
+                    if ($gamingtext[$i] !== $decodedContent[$i]) {
+                        $wrongletters++;
+                    }
+                }
+                // Check if the length of $decodedmsg->content is not zero before calculating accuracy
+                $accuracy = ($gamingtextlength > 0) ? (1 - $wrongletters / $gamingtextlength) * 100 : 0;
+                $this->lastMessageTime[$clientId] = $currentTime;
+                echo "Accuracy: $accuracy%\n";
+                foreach($this->rooms[$room] as $client) {
+                    if ($from !== $client) {
+                        $client->send(json_encode(['type' => 'done', 'content' => 'Accuracy: '.$accuracy.'%']));
+                    }
                 }
             }
         }
-        //Rate Limit (Thansk GPT)
-        $currentTime = microtime(true);
-        $clientId = $from->resourceId;
+        
+        if($decodedmsg->type == "close"){
+            $from->close();
+        }
 
+        if($decodedmsg->type == "start"){
+            $specialmsg = json_encode(['type' => 'special', 'content' => '']);
+            foreach($this->rooms[$room] as $client) {
+                $client->send($specialmsg);
+            }
+        }
         // Check if the client has exceeded the rate limit
         if ($this->isRateLimited($clientId, $currentTime)) {
             echo "Client $clientId exceeded rate limit\n";
@@ -73,12 +101,7 @@ class Chat implements MessageComponentInterface {
         }
 
 
-        $numRecv = count($this->rooms[$room]) - 1;
-
-        if($numRecv == 0){
-            echo "No one else in this room\n";
-        }
-        else{
+        if(!$numRecv == 0){
             echo sprintf('Connection %d sending message "%s" in room %s to %d other connection%s' . "\n"
             , $from->resourceId, $msg, $room, $numRecv, $numRecv == 1 ? '' : 's');
 
